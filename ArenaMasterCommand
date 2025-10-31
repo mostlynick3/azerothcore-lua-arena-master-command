@@ -1,0 +1,36 @@
+local function OpenBattlegroundMenu(player, bgTypeId) -- Converted to Lua from BattlegroundMgr::GetBattlegroundThroughClientInstance in BattlegroundMgr.cpp
+    local packet = CreatePacket(0x23D, 0)
+    
+    packet:WriteGUID(player:GetGUID())
+    packet:WriteUByte(0) -- From where (I think this is always 0)
+    packet:WriteULong(bgTypeId) -- 6 for arena
+    packet:WriteUByte(0) -- HasWin
+    packet:WriteUByte(0) -- Unk
+    
+    packet:WriteUByte(0) -- Unk
+    packet:WriteULong(3720) -- Level 80 honor reward
+    packet:WriteULong(25) -- Level 80 arena points reward
+    packet:WriteULong(620) -- Loss honor
+    packet:WriteUByte(0) -- Is random
+    
+    packet:WriteULong(0) -- Instance count
+    
+    player:SendPacket(packet) -- Send packet as constructed by talking to Dalaran arena master
+end
+
+local function OnBattlemasterCommand(event, player, command)
+    if player then
+        if command == "ar" then
+            OpenBattlegroundMenu(player, 6) -- Construct arena list package. Type 6 is used by Arena Master in Dalaran
+            -- 1 is Alterac Valley
+            -- 2 is Warsong Gulch
+            -- 3 is Arathi Basin
+            -- 4,5, 6, 8, 10 are Arena Battles
+            -- 7 is Eye of the Storm
+            -- 9, 12+ is Strand of the Ancients
+            return false
+        end
+    end
+end
+
+RegisterPlayerEvent(42, OnBattlemasterCommand)
